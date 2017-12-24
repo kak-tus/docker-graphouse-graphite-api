@@ -1,0 +1,21 @@
+finders:
+  - graphite_api.finders.graphouse_api.GraphouseFinder
+graphouse:
+  url: http://
+  {{- if service "graphouse-http" }}
+    {{- range $s := service "graphouse-http~_agent" -}}
+      {{- if not ( scratch.Key "addr1" ) }}
+        {{- scratch.Set "addr1" "1" }}
+        {{- $s.Address }}:{{ $s.Port }}
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- range $dc := datacenters }}
+      {{- range $s := $dc | printf "graphouse-http@%s" | service }}
+        {{- if not ( scratch.Key "addr2" ) }}
+          {{- scratch.Set "addr2" "1" }}
+          {{- $s.Address }}:{{ $s.Port }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
